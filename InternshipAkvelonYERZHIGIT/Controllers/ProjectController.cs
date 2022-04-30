@@ -11,7 +11,7 @@ namespace InternshipAkvelonYERZHIGIT.Controllers
     [Route("[controller]")]
     public class ProjectController : Controller
     {
-        private ProjectsContext _database; 
+        private readonly ProjectsContext _database; 
         public ProjectController(ProjectsContext databaseContext)
         {
             _database = databaseContext;
@@ -22,47 +22,38 @@ namespace InternshipAkvelonYERZHIGIT.Controllers
         public Project SelectInfoFromProjectById(int id)
         {
             var takedInfo = _database.Projects.ToList();
-            for (int i = 0; i < takedInfo.Count; i++)
-            {
-                if (takedInfo[i].ProjectId == id)
-                {
-                    return takedInfo[i];
-                }
-            }
-            return null;
+            return takedInfo.FirstOrDefault(t => t.ProjectId == id);
+            //Here we have the first ID filter that works based on the GET route. The result returns the element at the given id.
         }
         [HttpGet]
         [Route("get/title")]
         public List<Project> SelectInfoFromProjectByTitle(string title)
         {
             var takedInfo = _database.Projects.ToList();
-            var infoForGive = new List<Project>();
-            for (int i = 0; i < takedInfo.Count; i++)
-            {
-                if (takedInfo[i].Title.Contains(title))
-                {
-                    infoForGive.Add(takedInfo[i]);
-                }
-            }
-            return infoForGive;
+            return takedInfo.Where(t => t.Title.Contains(title)).ToList();
+            //Here we have a second filter that also works based on the get route and returns data for the specified title.
         }
 
         [HttpPost]
         [Route("add")]
         public ActionResult AddingInfoToProject([FromBody]ProjectDto dto)
         {
-            Project newProject = new Project();
-            newProject.Title = dto.Title;
-            newProject.Descroiption = dto.Description;
-            newProject.StartDate = dto.StartDate;
-            newProject.CompletionDate = dto.CompletionDate;
-            newProject.Status = dto.Status;
-            newProject.Priority = dto.Priority;
+            //This is our method of adding data to the database, which is done based on the Post route. The data is taken from the user through Swagger and written to the database.
+            var newProject = new Project
+            {
+                Title = dto.Title,
+                Descroiption = dto.Description,
+                StartDate = dto.StartDate,
+                CompletionDate = dto.CompletionDate,
+                Status = dto.Status,
+                Priority = dto.Priority
+            };
 
             _database.Projects.Add(newProject);
             _database.SaveChanges();
 
             return Ok(newProject.ProjectId);
+            
         }
       
         [HttpPost]
@@ -71,6 +62,7 @@ namespace InternshipAkvelonYERZHIGIT.Controllers
         {
             if (_database.Projects.Any(project => project.ProjectId == id))
             {
+                //This delete method which uses the Post route which, given the id of the string, removes it from the database.
                 var projectFromDb = new Project();
                 _database.Remove(_database.Projects.FirstOrDefault(project => project.ProjectId == id));
                 _database.SaveChanges();
@@ -78,7 +70,7 @@ namespace InternshipAkvelonYERZHIGIT.Controllers
             }
             else
             {
-                return Ok("OMG! Really No info? Fuck!!!!");
+                return Ok("OMG! Really No info? Fuck!!!");
             }
          
         }
@@ -90,15 +82,18 @@ namespace InternshipAkvelonYERZHIGIT.Controllers
         {
             var takedInfo = _database.Projects.ToList();
             return takedInfo;
+            //Shows all the information that is in the table.
         }
 
         [HttpPost]
         [Route("update/{id:int}")]
         public ActionResult EditInfoFromDb([FromRoute]int id, [FromBody] ProjectDto dto)
         {
-            if (_database.Projects.Any(project => project.ProjectId == id))
+            //This method allows you to change existing data based on the Post route, which takes the id from the user and change the rows in the table corresponding to this id.
+            if (!_database.Projects.Any(project => project.ProjectId == id))
+                return Ok("I Fuck this id. No info Mother Father");
             {
-                Project newProject = _database.Projects.FirstOrDefault(project => project.ProjectId == id);
+                var newProject = _database.Projects.FirstOrDefault(project => project.ProjectId == id);
                 newProject.Title = dto.Title;
                 newProject.Descroiption = dto.Description;
                 newProject.StartDate = dto.StartDate;
@@ -110,7 +105,6 @@ namespace InternshipAkvelonYERZHIGIT.Controllers
                 _database.SaveChanges();
                 return Ok("Yeah! Updated, You are cool!");
             }
-            return Ok("I Fuck this id. No info Mother Father");
         }
 
         [HttpGet]
