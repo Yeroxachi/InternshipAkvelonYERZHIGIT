@@ -67,7 +67,7 @@ namespace InternshipAkvelonYERZHIGIT.Controllers
       
         [HttpPost]
         [Route("delete")]
-        public ActionResult AddingInfoToProject(int id)
+        public ActionResult DeletingInfoFromProject(int id)
         {
             if (_database.Projects.Any(project => project.ProjectId == id))
             {
@@ -82,10 +82,19 @@ namespace InternshipAkvelonYERZHIGIT.Controllers
             }
          
         }
+        
+        [HttpGet]
+        [Route("view")]
+
+        public List<Project> ViewAllDataFromProjects()
+        {
+            var takedInfo = _database.Projects.ToList();
+            return takedInfo;
+        }
 
         [HttpPost]
-        [Route("Update")]
-        public ActionResult EditInfoFromDb([FromRoute] int id, [FromBody] ProjectDto dto)
+        [Route("update/{id:int}")]
+        public ActionResult EditInfoFromDb([FromRoute]int id, [FromBody] ProjectDto dto)
         {
             if (_database.Projects.Any(project => project.ProjectId == id))
             {
@@ -103,5 +112,13 @@ namespace InternshipAkvelonYERZHIGIT.Controllers
             }
             return Ok("I Fuck this id. No info Mother Father");
         }
+
+        [HttpGet]
+        [Route("view-task")]
+        public List<Task> ShowAllTasksOfProject(int projectId)
+        {
+            return  _database.Tasks.Where(task => task.ProjectId == projectId).ToList();
+        }
+        
     }
 }
