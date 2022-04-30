@@ -90,7 +90,7 @@ namespace InternshipAkvelonYERZHIGIT.Controllers
             {
                 var newTask = _database.Tasks.FirstOrDefault(task => task.TaskId == id);
                 newTask.Title = dto.Title;
-                newTask.Description = dto.Description;
+                newTask.Description = dto.Description; 
                 newTask.ProjectId = dto.ProjectId;
                 newTask.Status = dto.Status;
                 newTask.Priority = dto.Priority;
